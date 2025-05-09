@@ -1,8 +1,6 @@
-
+import fs from "fs/promises";
 import { Duration } from "../model/Duration.js";
 import { RaceResult } from "../model/RaceResult.js";
-import fs from 'fs';
-import path from 'path';
 
 /**
  * This class handle the race results management system.
@@ -28,7 +26,7 @@ export class RaceResultsService {
     if (result instanceof RaceResult) {
       this._raceResults.push(result);
     } else {
-      throw new Error("Invalid RaceResult object.");
+      throw new Error("Invalid RaceResult object");
     }
   }
 
@@ -36,23 +34,15 @@ export class RaceResultsService {
    * Saves the race results list to a JSON file.
    * @param {string} filePath - The path to the file where data should be saved.
    */
-  saveToFile(filePath = '../../data/raceScores.json') {
+  async saveToFile(filePath) {
     // TODO
-    const fullPath = path.resolve(filePath);
-    const dir = path.dirname(fullPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    // Prepare data for saving
-    const data = this._raceResults.map(result => ({
-      participantId: result.participantId,
-      sport: result.sport,
-      duration: result.duration.toJSON()
+    const data = this._raceResults.map(r => ({
+      participantId: r.participantId,
+      sportType: r.sportType,
+      duration: r.duration.totalSeconds, // save raw seconds
     }));
 
-    // Save in pretty-printed format
-    fs.writeFileSync(fullPath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
   }
 
   /**
@@ -60,19 +50,21 @@ export class RaceResultsService {
    * @param {string} filePath - The path to the file to load data from.
    * @returns {boolean} True if loading was successful, false otherwise.
    */
-  loadFromFile(filePath = '../data/raceScores.json') {
-    // TODO
+  async loadFromFile(filePath) {
     try {
-      const json = fs.readFileSync(path.resolve(filePath), 'utf-8');
-      const data = JSON.parse(json);
-      this._raceResults = data.map(entry => new RaceResult(
-        entry.participantId,
-        entry.sport,
-        Duration.fromJSON(entry.duration)
-      ));
+      const data = await fs.readFile(filePath, "utf8");
+      const parsed = JSON.parse(data);
+
+      this._raceResults = parsed.map(item =>
+        new RaceResult(
+          item.participantId,
+          item.sportType,
+          new Duration(item.duration)
+        )
+      );
       return true;
-    } catch (error) {
-      console.error("Error loading file:", error.message);
+    } catch (err) {
+      console.error("Error loading from file:", err);
       return false;
     }
   }
@@ -85,8 +77,8 @@ export class RaceResultsService {
    */
   getTimeForParticipant(participantId, sport) {
        // TODO
-      const result = this._raceResults.find(
-        r => r.participantId === participantId && r.sport === sport
+       const result = this._raceResults.find(
+        r => r.participantId === participantId && r.sportType === sport
       );
       return result ? result.duration : null;
   }
@@ -97,10 +89,14 @@ export class RaceResultsService {
    * @returns {Duration|null} The total Duration object if found, otherwise null.
    */
   getTotalTimeForParticipant(participantId) {
-        // TODO
-        const results = this._raceResults.filter(r => r.participantId === participantId);
-        if (results.length === 0) return null;
-      
-        return results.reduce((total, r) => total.plus(r.duration), new Duration(0));
+    const results = this._raceResults.filter(
+      result => result._participantId === participantId
+    );
+  
+    if (results.length === 0) return null;
+  
+    return results
+      .map(r => r._duration)
+      .reduce((acc, dur) => acc.plus(dur));
   }
 }

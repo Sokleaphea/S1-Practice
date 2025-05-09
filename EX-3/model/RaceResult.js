@@ -1,20 +1,48 @@
 import { Duration } from "./Duration.js";
+
 /**
- * This class handle a single race time for a given particicpant and sport type
+ * This class handles a single race time for a given participant and sport type.
  */
 export class RaceResult {
+  /**
+   * @type {string}
+   * @private
+   */
+  _participantId;
 
-     // TODO
-      /**
-     * Creates a new RaceResult instance.
-     * @param {string} participantId - The participant's unique ID.
-     * @param {string} sport - The type of sport (e.g., 'running', 'cycling').
-     * @param {Duration} duration - The duration object representing the race time.
-     */
-     // TODO
-     constructor(participantId, sport, duration) {
-     this.participantId = participantId;
-     this.sport = sport;
-     this.duration = duration instanceof Duration ? duration : new Duration(duration);
-}
+  /**
+   * @type {string}
+   * @private
+   */
+  _sportType;
+
+  /**
+   * @type {Duration}
+   * @private
+   */
+  _duration;
+
+  get participantId() {
+     return this._participantId;
+   }
+   
+   get sportType() {
+     return this._sportType;
+   }
+   
+   get duration() {
+     return this._duration;
+   }   
+
+  /**
+   * Creates a new RaceResult.
+   * @param {string} participantId 
+   * @param {string} sportType 
+   * @param {Duration} duration 
+   */
+  constructor(participantId, sportType, duration) {
+    this._participantId = participantId;
+    this._sportType = sportType;
+    this._duration = duration;
   }
+}

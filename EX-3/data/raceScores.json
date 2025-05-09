@@ -1,1 +1,14 @@
-[{"participantId":"participant1","sport":"swim","duration":{"_totalSeconds":150}},{"participantId":"participant1","sport":"run","duration":{"_totalSeconds":105}},{"participantId":"participant2","sport":"swim","duration":{"_totalSeconds":195}}]
+[
+  {
+    "participantId": "participant1",
+    "sportType": "swim"
+  },
+  {
+    "participantId": "participant1",
+    "sportType": "run"
+  },
+  {
+    "participantId": "participant2",
+    "sportType": "swim"
+  }
+]
